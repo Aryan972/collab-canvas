@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
+import { io, Socket } from "socket.io-client";
 
 export default function CanvasBoard() {
     const canvasRef = useRef<HTMLCanvasElement | null>(null);          //crearting reference(initially null). It gives direct acces to DOM element, No re-render when ref changes
     const contextRef = useRef<CanvasRenderingContext2D | null>(null);
     const isDrawingRef = useRef(false);  //store drawing state with triggering re-render
+    const socketRef = useRef<Socket | null>(null);
 
     const[color, setColor] = useState<string>("black");
     const [lineWidth, setLineWidth] = useState<number>(3);
@@ -40,6 +42,24 @@ export default function CanvasBoard() {
 
         context.lineWidth = lineWidth;
     }, [lineWidth]);
+
+    useEffect(() => {
+        const socket = io("http://localhost:5000");
+
+        socketRef.current = socket;
+
+        socket.on("connect", () => {
+            console.log("Connected to server:", socket.id);
+        });
+
+        socket.on("disconnect", () => {
+            console.log("Disconnected from server");
+        });
+
+        return () => {
+            socket.disconnect();
+        };
+    }, []);
 
     function startDrawing(e: React.MouseEvent<HTMLCanvasElement>) {  //the typescript will tell us what typeof event it is and what element triggers it
         const context = contextRef.current;
