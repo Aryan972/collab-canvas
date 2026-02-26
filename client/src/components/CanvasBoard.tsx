@@ -50,6 +50,15 @@ export default function CanvasBoard() {
 
     }
 
+    function clearBoard(){                                          //to clear the board -> it's just clearing pixels so re-render is not reqiired(not using usestate)
+        const canvas = canvasRef.current;
+        const context = contextRef.current;
+
+        if(!canvas || !context) return;
+
+        context.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
     return (
         <div className="min-h-screen bg-gray-200 flex justify-center items-center p-6"> {/* Layout container -> centers canvas with full screen height and clean background */}
             <div className="bg-gray-100 p-8 rounded-2xl shadow-2xl border-2 border-gray-300">
@@ -57,6 +66,12 @@ export default function CanvasBoard() {
                     CollabCanvas Board
                 </h2>
                 
+                <button 
+                    onClick={clearBoard}
+                    className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition cursor-pointer"    
+                >
+                    Clear
+                </button>
                 <canvas
                     ref={canvasRef}
                     width={800}                                           //setting as attribute will set internal pixels
