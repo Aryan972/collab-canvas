@@ -18,6 +18,16 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  socket.on("start", (data) => {             //to broadcast to all other clients while start
+    console.log("Start recieved from: ", socket.id);
+    socket.broadcast.emit("start", data);
+  });
+
+  socket.on("draw", (data) => {             //to broadcast to all other clients while drawing
+    console.log("Draw recieved from: ", socket.id);
+    socket.broadcast.emit("draw", data);
+  })
+
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
   });

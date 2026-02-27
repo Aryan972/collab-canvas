@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react";
+import { useSocket } from "../context/SocketContext";
 
 type DrawingCanvasProps = {
   color: string;
   lineWidth: number;
-  onClearRef: React.MutableRefObject<(() => void) | null>;
+  onClearRef: React.RefObject<(() => void) | null>;
 };
+
 
 export default function DrawingCanvas({
   color,
@@ -14,6 +16,9 @@ export default function DrawingCanvas({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const isDrawingRef = useRef<boolean>(false);
+
+  const { socket } = useSocket();
+  console.log("Socket inside DrawingCanvas:", socket);
 
   // Initialize canvas
   useEffect(function () {
@@ -44,6 +49,8 @@ export default function DrawingCanvas({
     }
   }, [lineWidth]);
 
+
+  //start drawing
   function startDrawing(e: React.MouseEvent<HTMLCanvasElement>) {
     if (!contextRef.current) return;
 
@@ -53,16 +60,36 @@ export default function DrawingCanvas({
       e.nativeEvent.offsetX,
       e.nativeEvent.offsetY
     );
+
+    //emit start event
+    if(socket) {
+      socket.emit("start", {
+          x: e.nativeEvent.offsetX,
+          y: e.nativeEvent.offsetY,
+          color,
+          lineWidth,
+      });
+    }
   }
 
+  //drawing while moving
   function draw(e: React.MouseEvent<HTMLCanvasElement>) {
     if (!isDrawingRef.current || !contextRef.current) return;
 
-    contextRef.current.lineTo(
-      e.nativeEvent.offsetX,
-      e.nativeEvent.offsetY
-    );
+    const x = e.nativeEvent.offsetX;
+    const y = e.nativeEvent.offsetY;
+    contextRef.current.lineTo(x, y);
     contextRef.current.stroke();
+
+    //emit draw event
+    if(socket) {
+      socket.emit("draw", {
+        x,
+        y,
+        color,
+        lineWidth,
+      });
+    }
   }
 
   function stopDrawing() {
@@ -87,6 +114,58 @@ export default function DrawingCanvas({
   useEffect(() => {
     onClearRef.current = clearBoard;
   }, []);
+
+  //listen for remote start
+  useEffect(() => {
+    if (!socket || !contextRef.current) return;
+
+    const handleStart = (data: {
+      x: number;
+      y: number;
+      color: string;
+      lineWidth: number;
+    }) => {
+      const context = contextRef.current;
+      if (!context) return;
+
+      context.beginPath();
+      context.strokeStyle = data.color;
+      context.lineWidth = data.lineWidth;
+      context.moveTo(data.x, data.y);
+    };
+
+    socket.on("start", handleStart);
+
+    return () => {
+      socket.off("start", handleStart);
+    };
+  }, [socket]);
+
+  //Listen for remote draw
+  useEffect(() => {
+    if (!socket || !contextRef.current) return;
+
+    const handleDraw = (data: {
+      x: number;
+      y: number;
+      color: string;
+      lineWidth: number;
+    }) => {
+      const context = contextRef.current;
+      if (!context) return;
+
+      context.strokeStyle = data.color;
+      context.lineWidth = data.lineWidth;
+      context.lineTo(data.x, data.y);
+      context.stroke();
+    };
+
+    socket.on("draw", handleDraw);
+
+    return () => {
+      socket.off("draw", handleDraw);
+    };
+  }, [socket]);
 
   return (
     <canvas
