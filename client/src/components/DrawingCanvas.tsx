@@ -20,6 +20,9 @@ export default function DrawingCanvas({
   const { socket } = useSocket();
   console.log("Socket inside DrawingCanvas:", socket);
 
+  const context = useSocket();
+  console.log("Full socket context: ", context);
+
   // Initialize canvas
   useEffect(function () {
     const canvas = canvasRef.current;
@@ -100,6 +103,8 @@ export default function DrawingCanvas({
   }
 
   function clearBoard() {
+    console.log("Local clear triggered");
+
     if (!canvasRef.current || !contextRef.current) return;
 
     contextRef.current.clearRect(
@@ -108,16 +113,24 @@ export default function DrawingCanvas({
       canvasRef.current.width,
       canvasRef.current.height
     );
+
+    //emit clear event
+    if(socket) {
+      console.log("Emitting clear event");
+      socket.emit("clear");
+    } else{
+      console.log("Socket is null during clear");
+    }
   }
 
   // expose clear function to parent
   useEffect(() => {
     onClearRef.current = clearBoard;
-  }, []);
+  }, [clearBoard]);
 
   //listen for remote start
   useEffect(() => {
-    if (!socket || !contextRef.current) return;
+    if (!socket) return;
 
     const handleStart = (data: {
       x: number;
@@ -143,7 +156,7 @@ export default function DrawingCanvas({
 
   //Listen for remote draw
   useEffect(() => {
-    if (!socket || !contextRef.current) return;
+    if (!socket) return;
 
     const handleDraw = (data: {
       x: number;
@@ -164,6 +177,28 @@ export default function DrawingCanvas({
 
     return () => {
       socket.off("draw", handleDraw);
+    };
+  }, [socket]);
+
+  //listen for remote clear
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleClear= () => {
+      if( !canvasRef.current || !contextRef.current) return;
+
+      contextRef.current.clearRect(
+        0,
+        0,
+        canvasRef.current.width,
+        canvasRef.current.height
+      );
+    };
+
+    socket.on("clear", handleClear);
+
+    return () => {
+      socket.off("clear", handleClear);
     };
   }, [socket]);
 

@@ -14,11 +14,11 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const newSocket = io("http://localhost:5000");
 
-    setSocket(newSocket);
-
     newSocket.on("connect", () => {
       console.log("Connected:", newSocket.id);
     });
+    
+    setSocket(newSocket);
 
     return () => {
       newSocket.disconnect();

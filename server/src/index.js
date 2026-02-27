@@ -26,7 +26,12 @@ io.on("connection", (socket) => {
   socket.on("draw", (data) => {             //to broadcast to all other clients while drawing
     console.log("Draw recieved from: ", socket.id);
     socket.broadcast.emit("draw", data);
-  })
+  });
+
+  socket.on("clear", () => {             //to broadcast to all other clients while drawing
+    console.log("Clear recieved from: ", socket.id);
+    socket.broadcast.emit("clear");
+  });
 
   socket.on("disconnect", () => {
     console.log("User disconnected:", socket.id);
