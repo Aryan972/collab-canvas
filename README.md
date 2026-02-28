@@ -53,7 +53,7 @@ User → Emit `clear` → Server → Broadcast → All Clients Clear
 
 ---
 
-## Engineering Challenges Solved
+## Challenges Solved
 
 - Managed WebSocket lifecycle correctly using Context API
 - Resolved stale closure issue in event handlers
