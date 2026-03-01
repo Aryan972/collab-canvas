@@ -1,22 +1,35 @@
 # CollabCanvas – Real-Time Collaborative Whiteboard
 
 CollabCanvas is a real-time collaborative whiteboard built using **React, TypeScript, Node.js, and Socket.io**.  
-Multiple users can draw simultaneously and see updates instantly across connected clients.
+Multiple users can draw simultaneously inside isolated rooms with live synchronization.
 
 ---
 
 ## Live Features
 
--  Real-time drawing synchronization
--  Color and stroke width selection
--  Clear board sync across all users
--  WebSocket-based communication
--  Clean component-based architecture
--  Optimized rendering using `useRef`
+- Real-time multi-user drawing
+- Color and stroke width selection
+- Clear board synchronization
+- Room-based collaboration via URL
+- WebSocket-based bidirectional communication
+- Optimized rendering using `useRef`
+- Clean component-based architecture
 
 ---
 
-## Architecture
+## Room-Based Architecture
+
+Each room is uniquely identified via URL: /room/:roomId
+
+Users joining the same room share the same canvas state.  
+Events are scoped using Socket.io rooms to ensure isolation.
+
+### Room Flow
+
+1. User navigates to `/room/:roomId`
+2. Client emits `join-room`
+3. Server joins socket to that room
+4. All drawing & clear events are broadcast only inside that room
 
 The application follows a clean separation of concerns:
 
@@ -25,13 +38,13 @@ The application follows a clean separation of concerns:
 - **DrawingCanvas** – Canvas rendering engine
 - **SocketContext** – Global WebSocket management
 
-### Real-Time Event Flow
+## Real-Time Event Flow
 
-**Drawing**
-User → Emit `start` / `draw` → Server → Broadcast → Other Clients Render
+### Drawing
+User → Emit `start` / `draw` (with roomId) → Server → Broadcast to room → Other clients render stroke
 
-**Clear**
-User → Emit `clear` → Server → Broadcast → All Clients Clear
+### Clear
+User → Emit `clear` (with roomId) → Server → Broadcast to room → All room members clear board
 
 ---
 
@@ -40,6 +53,7 @@ User → Emit `clear` → Server → Broadcast → All Clients Clear
 ### Frontend
 - React
 - TypeScript
+- React Router
 - Context API
 - Tailwind CSS
 - HTML5 Canvas API
@@ -49,17 +63,18 @@ User → Emit `clear` → Server → Broadcast → All Clients Clear
 - Node.js
 - Express
 - Socket.io
-- Event-driven architecture
+- Room-based event broadcasting
 
 ---
 
-## Challenges Solved
+## Engineering Highlights
 
-- Managed WebSocket lifecycle correctly using Context API
-- Resolved stale closure issue in event handlers
+- Implemented URL-driven room architecture
+- Designed event-scoped WebSocket communication
+- Fixed stale closure issue in React event handlers
+- Managed socket lifecycle using Context API
 - Prevented unnecessary re-renders using `useRef`
-- Ensured proper listener registration after socket initialization
-- Implemented real-time bidirectional communication
+- Ensured backend stability with proper event payload handling
 
 ---
 
