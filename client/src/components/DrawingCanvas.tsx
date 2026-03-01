@@ -8,7 +8,6 @@ type DrawingCanvasProps = {
   onClearRef: React.RefObject<(() => void) | null>;
 };
 
-
 export default function DrawingCanvas({
   roomId,
   color,
@@ -27,11 +26,42 @@ export default function DrawingCanvas({
 
   //room logic
   useEffect(() => {
-    if(!socket) return;
+    if (!socket) return;
 
     socket.emit("join-room", roomId); //whenever socket available -> join room
     console.log("Joined room:", roomId);
   }, [socket, roomId]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleLoadBoard = (strokes: any[]) => {
+      const context = contextRef.current;
+      if (!context) return;
+
+      context.clearRect(0, 0, 800, 500);
+
+      strokes.forEach((stroke) => {
+        if (stroke.type === "start") {
+          context.beginPath();
+          context.strokeStyle = stroke.color;
+          context.lineWidth = stroke.lineWidth;
+          context.moveTo(stroke.x, stroke.y);
+        }
+
+        if (stroke.type === "draw") {
+          context.lineTo(stroke.x, stroke.y);
+          context.stroke();
+        }
+      });
+    };
+
+    socket.on("load-board", handleLoadBoard);
+
+    return () => {
+      socket.off("load-board", handleLoadBoard);
+    };
+  }, [socket]);
 
   // Initialize canvas
   useEffect(function () {
@@ -49,19 +79,24 @@ export default function DrawingCanvas({
   }, []);
 
   // Sync color
-  useEffect(function () {
-    if (contextRef.current) {
-      contextRef.current.strokeStyle = color;
-    }
-  }, [color]);
+  useEffect(
+    function () {
+      if (contextRef.current) {
+        contextRef.current.strokeStyle = color;
+      }
+    },
+    [color],
+  );
 
   // Sync line width
-  useEffect(function () {
-    if (contextRef.current) {
-      contextRef.current.lineWidth = lineWidth;
-    }
-  }, [lineWidth]);
-
+  useEffect(
+    function () {
+      if (contextRef.current) {
+        contextRef.current.lineWidth = lineWidth;
+      }
+    },
+    [lineWidth],
+  );
 
   //start drawing
   function startDrawing(e: React.MouseEvent<HTMLCanvasElement>) {
@@ -69,19 +104,16 @@ export default function DrawingCanvas({
 
     isDrawingRef.current = true;
     contextRef.current.beginPath();
-    contextRef.current.moveTo(
-      e.nativeEvent.offsetX,
-      e.nativeEvent.offsetY
-    );
+    contextRef.current.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
 
     //emit start event to sync among multiple users
-    if(socket) {
+    if (socket) {
       socket.emit("start", {
-          roomId,
-          x: e.nativeEvent.offsetX,
-          y: e.nativeEvent.offsetY,
-          color,
-          lineWidth,
+        roomId,
+        x: e.nativeEvent.offsetX,
+        y: e.nativeEvent.offsetY,
+        color,
+        lineWidth,
       });
     }
   }
@@ -96,7 +128,7 @@ export default function DrawingCanvas({
     contextRef.current.stroke();
 
     //emit draw event
-    if(socket) {
+    if (socket) {
       socket.emit("draw", {
         roomId,
         x,
@@ -123,16 +155,16 @@ export default function DrawingCanvas({
       0,
       0,
       canvasRef.current.width,
-      canvasRef.current.height
+      canvasRef.current.height,
     );
 
     //emit clear event
-    if(socket) {
+    if (socket) {
       console.log("Emitting clear event");
       socket.emit("clear", {
         roomId,
       });
-    } else{
+    } else {
       console.log("Socket is null during clear");
     }
   }
@@ -198,14 +230,14 @@ export default function DrawingCanvas({
   useEffect(() => {
     if (!socket) return;
 
-    const handleClear= () => {
-      if( !canvasRef.current || !contextRef.current) return;
+    const handleClear = () => {
+      if (!canvasRef.current || !contextRef.current) return;
 
       contextRef.current.clearRect(
         0,
         0,
         canvasRef.current.width,
-        canvasRef.current.height
+        canvasRef.current.height,
       );
     };
 
