@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import { useSocket } from "../context/SocketContext";
 
 type DrawingCanvasProps = {
+  roomId: string;
   color: string;
   lineWidth: number;
   onClearRef: React.RefObject<(() => void) | null>;
@@ -9,6 +10,7 @@ type DrawingCanvasProps = {
 
 
 export default function DrawingCanvas({
+  roomId,
   color,
   lineWidth,
   onClearRef,
@@ -22,6 +24,14 @@ export default function DrawingCanvas({
 
   const context = useSocket();
   console.log("Full socket context: ", context);
+
+  //room logic
+  useEffect(() => {
+    if(!socket) return;
+
+    socket.emit("join-room", roomId); //whenever socket available -> join room
+    console.log("Joined room:", roomId);
+  }, [socket, roomId]);
 
   // Initialize canvas
   useEffect(function () {
@@ -64,9 +74,10 @@ export default function DrawingCanvas({
       e.nativeEvent.offsetY
     );
 
-    //emit start event
+    //emit start event to sync among multiple users
     if(socket) {
       socket.emit("start", {
+          roomId,
           x: e.nativeEvent.offsetX,
           y: e.nativeEvent.offsetY,
           color,
@@ -87,6 +98,7 @@ export default function DrawingCanvas({
     //emit draw event
     if(socket) {
       socket.emit("draw", {
+        roomId,
         x,
         y,
         color,
@@ -117,7 +129,9 @@ export default function DrawingCanvas({
     //emit clear event
     if(socket) {
       console.log("Emitting clear event");
-      socket.emit("clear");
+      socket.emit("clear", {
+        roomId,
+      });
     } else{
       console.log("Socket is null during clear");
     }

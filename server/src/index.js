@@ -18,19 +18,25 @@ const io = new Server(server, {
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
 
+  //join room when start
+  socket.on("join-room", ((roomId) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} joined room ${roomId}`);
+  }))
+
   socket.on("start", (data) => {             //to broadcast to all other clients while start
     console.log("Start recieved from: ", socket.id);
-    socket.broadcast.emit("start", data);
+    socket.to(data.roomId).emit("start", data);
   });
 
   socket.on("draw", (data) => {             //to broadcast to all other clients while drawing
     console.log("Draw recieved from: ", socket.id);
-    socket.broadcast.emit("draw", data);
+    socket.to(data.roomId).emit("draw", data);
   });
 
-  socket.on("clear", () => {             //to broadcast to all other clients while drawing
+  socket.on("clear", (data) => {             //to broadcast to all other clients while drawing
     console.log("Clear recieved from: ", socket.id);
-    socket.broadcast.emit("clear");
+    socket.to(data.roomId).emit("clear");
   });
 
   socket.on("disconnect", () => {

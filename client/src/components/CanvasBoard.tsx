@@ -2,7 +2,11 @@ import { useRef, useState } from "react";
 import Toolbar from "./Toolbar";
 import DrawingCanvas from "./DrawingCanvas";
 
-export default function CanvasBoard() {
+type CanvasBoardProps = {
+  roomId: string;
+}
+
+export default function CanvasBoard({roomId} : CanvasBoardProps) {
   // Shared state (single source of truth)
   const [color, setColor] = useState<string>("black");
   const [lineWidth, setLineWidth] = useState<number>(3);
@@ -29,6 +33,7 @@ export default function CanvasBoard() {
         />
 
         <DrawingCanvas
+          roomId={roomId}
           color={color}
           lineWidth={lineWidth}
           onClearRef={clearRef}
