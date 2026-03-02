@@ -19,6 +19,7 @@ export default function DrawingCanvas({
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
   const isDrawingRef = useRef<boolean>(false);
+  const lastEmitRef = useRef<number>(0); //throttle not to emit on every mouse move
 
   const { socket } = useSocket();
   console.log("Socket inside DrawingCanvas:", socket);
@@ -85,12 +86,19 @@ export default function DrawingCanvas({
     const canvas = canvasRef.current;
     if (!canvas) return;
 
+    //board width and height
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight - 56;
+
     const context = canvas.getContext("2d");
     if (!context) return;
 
     context.lineCap = "round";
     context.strokeStyle = color;
     context.lineWidth = lineWidth;
+
+    
+  
 
     contextRef.current = context;
   }, []);
@@ -144,8 +152,9 @@ export default function DrawingCanvas({
     contextRef.current.lineTo(x, y);
     contextRef.current.stroke();
 
-    //emit draw event
-    if (socket) {
+    //emit draw event after ~20 ms -> throttling
+    const now = Date.now();
+    if (socket && now - lastEmitRef.current > 20) {
       socket.emit("draw", {
         roomId,
         x,
@@ -153,6 +162,7 @@ export default function DrawingCanvas({
         color,
         lineWidth,
       });
+      lastEmitRef.current = now;
     }
   }
 
@@ -270,7 +280,7 @@ export default function DrawingCanvas({
       ref={canvasRef}
       width={800}
       height={500}
-      className="bg-white rounded-md border-4 border-black"
+      className="bg-white"
       onMouseDown={startDrawing}
       onMouseMove={draw}
       onMouseUp={stopDrawing}

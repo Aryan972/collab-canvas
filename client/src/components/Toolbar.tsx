@@ -14,9 +14,9 @@ export default function Toolbar({
   onClear,
 }: ToolbarProps) {
   return (
-    <div className="bg-white shadow-md rounded-xl px-6 py-4 mb-6 flex items-center justify-between">
+    <div className="flex items-center gap-4">
       {/* Left - Title */}
-      <h2 className="text-2xl font-semibold text-gray-800">CollabCanvas</h2>
+      <h2 className="text-xl font-semibold text-gray-800">CollabCanvas</h2>
 
       {/* Right - Controls */}
       <div className="flex items-center gap-5">
@@ -24,7 +24,7 @@ export default function Toolbar({
         <div className="flex items-center gap-3">
           <button
             onClick={() => setColor("black")}
-            className={`w-7 h-7 rounded-full border-2 transition ${
+            className={`w-5 h-5 rounded-full border-2 transition ${
               color === "black"
                 ? "ring-2 ring-offset-2 ring-black"
                 : "border-gray-300"
@@ -32,7 +32,7 @@ export default function Toolbar({
           />
           <button
             onClick={() => setColor("red")}
-            className={`w-7 h-7 rounded-full border-2 transition ${
+            className={`w-5 h-5 rounded-full border-2 transition ${
               color === "red"
                 ? "ring-2 ring-offset-2 ring-black"
                 : "border-gray-300"
@@ -40,7 +40,7 @@ export default function Toolbar({
           />
           <button
             onClick={() => setColor("blue")}
-            className={`w-7 h-7 rounded-full border-2 transition ${
+            className={`w-5 h-5 rounded-full border-2 transition ${
               color === "blue"
                 ? "ring-2 ring-offset-2 ring-black"
                 : "border-gray-300"
@@ -52,7 +52,7 @@ export default function Toolbar({
         <select
           value={lineWidth}
           onChange={(e) => setLineWidth(Number(e.target.value))}
-          className="px-3 py-2 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="px-2 py-1 border border-gray-300 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
         >
           <option value={1}>Thin</option>
           <option value={3}>Medium</option>
@@ -63,7 +63,7 @@ export default function Toolbar({
         {/* Clear Button */}
         <button
           onClick={onClear}
-          className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-600 transition shadow-sm"
+          className="px-3 py-1 bg-gray-900 text-white rounded-lg hover:bg-gray-600 transition shadow-sm"
         >
           Clear
         </button>
