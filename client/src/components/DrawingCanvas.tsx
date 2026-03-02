@@ -97,11 +97,10 @@ export default function DrawingCanvas({
     context.strokeStyle = color;
     context.lineWidth = lineWidth;
 
-    
-  
-
     contextRef.current = context;
   }, []);
+
+
 
   // Sync color
   useEffect(
@@ -124,9 +123,10 @@ export default function DrawingCanvas({
   );
 
   //start drawing
-  function startDrawing(e: React.MouseEvent<HTMLCanvasElement>) {
+  function startDrawing(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!contextRef.current) return;
 
+    e.currentTarget.setPointerCapture(e.pointerId);
     isDrawingRef.current = true;
     contextRef.current.beginPath();
     contextRef.current.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
@@ -144,7 +144,7 @@ export default function DrawingCanvas({
   }
 
   //drawing while moving
-  function draw(e: React.MouseEvent<HTMLCanvasElement>) {
+  function draw(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!isDrawingRef.current || !contextRef.current) return;
 
     const x = e.nativeEvent.offsetX;
@@ -166,11 +166,12 @@ export default function DrawingCanvas({
     }
   }
 
-  function stopDrawing() {
+  function stopDrawing(e: React.PointerEvent<HTMLCanvasElement>) {
     if (!contextRef.current) return;
 
     isDrawingRef.current = false;
     contextRef.current.closePath();
+    e.currentTarget.releasePointerCapture(e.pointerId);
   }
 
   function clearBoard() {
@@ -280,11 +281,11 @@ export default function DrawingCanvas({
       ref={canvasRef}
       width={800}
       height={500}
-      className="bg-white"
-      onMouseDown={startDrawing}
-      onMouseMove={draw}
-      onMouseUp={stopDrawing}
-      onMouseLeave={stopDrawing}
+      className="bg-white touch-none"
+      onPointerDown={startDrawing}
+      onPointerMove={draw}
+      onPointerUp={stopDrawing}
+      onPointerLeave={stopDrawing}
     />
   );
 }
