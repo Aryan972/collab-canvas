@@ -1,50 +1,79 @@
 # CollabCanvas – Real-Time Collaborative Whiteboard
 
-CollabCanvas is a real-time collaborative whiteboard built using **React, TypeScript, Node.js, and Socket.io**.  
-Multiple users can draw simultaneously inside isolated rooms with live synchronization.
+🔗 **Live Demo:** https://your-vercel-url.vercel.app  
+📂 **GitHub Repository:** https://github.com/your-username/collab-canvas  
 
 ---
 
-## Live Features
+## Overview
+
+CollabCanvas is a full-stack real-time collaborative whiteboard built using **React, TypeScript, Node.js, and Socket.io**.
+
+It enables multiple users to draw simultaneously inside isolated rooms with live stroke synchronization, active user presence tracking, and board state replay for late joiners.
+
+The system follows an event-driven WebSocket architecture and is deployed in production.
+
+
+---
+
+## Features
 
 - Real-time multi-user drawing
-- Color and stroke width selection
-- Clear board synchronization
-- Room-based collaboration via URL
-- WebSocket-based bidirectional communication
+- Room-based collaboration via dynamic URL routing
+- Live active user presence tracking
+- Stroke synchronization using WebSockets
+- Board state replay for late joiners
+- Synchronized clear events
+- Copy room link with contextual popup feedback
+- Full-screen distraction-free whiteboard layout
+- Desktop + Mobile support using Pointer Events
 - Optimized rendering using `useRef`
-- Clean component-based architecture
+- Deployed frontend (Vercel) & backend (Render)
 
 ---
+
+## Architecture
 
 ## Room-Based Architecture
 
-Each room is uniquely identified via URL: /room/:roomId
+Each session is uniquely identified via URL: /room/:roomId
 
-Users joining the same room share the same canvas state.  
-Events are scoped using Socket.io rooms to ensure isolation.
+Users inside the same room share:
 
-### Room Flow
+- Drawing strokes
+- Clear events
+- Active user count
+- Real-time updates
 
-1. User navigates to `/room/:roomId`
-2. Client emits `join-room`
-3. Server joins socket to that room
-4. All drawing & clear events are broadcast only inside that room
+Rooms are fully isolated from each other.
 
-The application follows a clean separation of concerns:
+---
 
-- **CanvasBoard** – State coordinator
-- **Toolbar** – UI controls (color, width, clear)
-- **DrawingCanvas** – Canvas rendering engine
-- **SocketContext** – Global WebSocket management
+## Event-Driven Flow
 
-## Real-Time Event Flow
+#### Drawing Flow
 
-### Drawing
-User → Emit `start` / `draw` (with roomId) → Server → Broadcast to room → Other clients render stroke
+User → Emit `start` / `draw` →  
+Server stores stroke →  
+Broadcast to room →  
+Other clients render stroke  
 
-### Clear
-User → Emit `clear` (with roomId) → Server → Broadcast to room → All room members clear board
+---
+
+#### Clear Flow
+
+User → Emit `start` / `draw` →  
+Server stores stroke →  
+Broadcast to room →  
+Other clients render stroke  
+
+---
+
+#### Late Join Flow
+
+User joins room →  
+Server emits stored strokes →  
+Client replays board state 
 
 ---
 
@@ -57,28 +86,35 @@ User → Emit `clear` (with roomId) → Server → Broadcast to room → All roo
 - Context API
 - Tailwind CSS
 - HTML5 Canvas API
+- Pointer Events API
 - Socket.io Client
+- Vite
 
 ### Backend
 - Node.js
 - Express
 - Socket.io
-- Room-based event broadcasting
+- Room-based in-memory state managment
+
+### Deployment
+- Frontend: Vercel
+- Backend: Render
 
 ---
 
 ## Engineering Highlights
 
-- Implemented URL-driven room architecture
-- Designed event-scoped WebSocket communication
-- Fixed stale closure issue in React event handlers
-- Managed socket lifecycle using Context API
-- Prevented unnecessary re-renders using `useRef`
-- Ensured backend stability with proper event payload handling
+-  Designed scalable room-scoped WebSocket broadcasting
+- Implemented real-time presence tracking using Socket.io adapter
+- Built late-join board replay mechanism
+- Implemented pointer event handling for cross-device input support
+- Optimized draw emission frequency for performance
+- Managed WebSocket lifecycle using React Context
+- Built full-screen responsive whiteboard layout
 
 ---
 
-##  Installation & Setup
+##  Local Development Setup
 
 ### 1. Clone the repository
 ```bash
