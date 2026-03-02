@@ -31,6 +31,10 @@ io.on("connection", (socket) => {
     
     socket.emit("load-board", rooms[roomId]); //send existing strokes to new user in the same room
     console.log(`Socket ${socket.id} joined room ${roomId}`);
+
+    const room = io.sockets.adapter.rooms.get(roomId);
+    const userCount = room ? room.size : 0;
+    io.to(roomId).emit("room-users", userCount);
   }))
 
   socket.on("start", (data) => {             //to broadcast to all other clients while start
@@ -55,6 +59,14 @@ io.on("connection", (socket) => {
   });
 
   socket.on("disconnect", () => {
+
+    socket.rooms.forEach((roomId) => {
+      if(rooms[roomId]) {
+        const room = io.sockets.adapter.rooms.get(roomId);
+        const userCount = room ? room.size - 1: 0;
+        io.to(roomId).emit("room-users", userCount);
+      }
+    })
     console.log("User disconnected:", socket.id);
   });
 });

@@ -11,6 +11,8 @@ export default function CanvasBoard({roomId} : CanvasBoardProps) {
   const [color, setColor] = useState<string>("black");
   const [lineWidth, setLineWidth] = useState<number>(3);
 
+  const [userCount, setUserCount] = useState(1);
+
   // Clear function reference from DrawingCanvas
   const clearRef = useRef<(() => void) | null>(null);
 
@@ -30,12 +32,17 @@ export default function CanvasBoard({roomId} : CanvasBoardProps) {
             Room: <span className="text-gray-600">{roomId}</span>
           </h2>
 
+          <div className="bg-gray-200 px-3 py-1 rounded-full text-sm text-gray-700">
+            {userCount} {userCount === 1 ? "User" : "Users"}
+          </div>
+          
           <button
             onClick={() => navigator.clipboard.writeText(window.location.href)}
             className="bg-gray-900 text-white px-4 py-2 rounded-md hover:bg-gray-700"
           >
             Copy Link
           </button>
+
         </div>
 
         {/* Main Content */}
@@ -54,6 +61,7 @@ export default function CanvasBoard({roomId} : CanvasBoardProps) {
             color={color}
             lineWidth={lineWidth}
             onClearRef={clearRef}
+            onUserCountChange={setUserCount}
           />
         </div>
 

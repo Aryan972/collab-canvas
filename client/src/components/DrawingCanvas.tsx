@@ -6,6 +6,7 @@ type DrawingCanvasProps = {
   color: string;
   lineWidth: number;
   onClearRef: React.RefObject<(() => void) | null>;
+  onUserCountChange: (count: number) => void;
 };
 
 export default function DrawingCanvas({
@@ -13,6 +14,7 @@ export default function DrawingCanvas({
   color,
   lineWidth,
   onClearRef,
+  onUserCountChange,
 }: DrawingCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const contextRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -60,6 +62,21 @@ export default function DrawingCanvas({
 
     return () => {
       socket.off("load-board", handleLoadBoard);
+    };
+  }, [socket]);
+
+  //listen for room users
+  useEffect(() => {
+    if(!socket) return;
+
+    const handleUsersUpdate = (count: number) => {
+      onUserCountChange(count);
+    };
+
+    socket.on("room-users", handleUsersUpdate);
+
+    return () => {
+      socket.off("room-users", handleUsersUpdate);
     };
   }, [socket]);
 
