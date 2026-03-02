@@ -12,7 +12,7 @@ const SocketContext = createContext<SocketContextType>({
 export function SocketProvider({ children }: { children: React.ReactNode }) {
   const [socket, setSocket] = useState<Socket | null>(null);
   useEffect(() => {
-    const newSocket = io("http://localhost:5000");
+    const newSocket = io("https://collab-canvas-r7nl.onrender.com");
 
     newSocket.on("connect", () => {
       console.log("Connected:", newSocket.id);
