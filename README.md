@@ -1,6 +1,6 @@
 # CollabCanvas – Real-Time Collaborative Whiteboard
 
-🔗 **Live Demo:** https://your-vercel-url.vercel.app  
+🔗 **Live Demo:** https://collab-canvas-weld.vercel.app/  
 📂 **GitHub Repository:** https://github.com/your-username/collab-canvas  
 
 ---
